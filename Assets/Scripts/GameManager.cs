@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public GameObject selectedCircle;
-    public GameObject selectedGround;
+    public GameObject selectedStand;
     Circle circle;
     public bool isMove;
 
@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
             {
                 if (hit.collider != null && hit.collider.CompareTag("Stand"))
                 {
-                    if (selectedCircle !=null && selectedCircle != hit.collider.gameObject)
+                    if (selectedCircle !=null && selectedStand != hit.collider.gameObject)
                     {//çemberi gönder. 
                         
                     }
@@ -32,6 +32,12 @@ public class GameManager : MonoBehaviour
                         selectedCircle = stand.TopMostCircle();
                         circle = selectedCircle.GetComponent<Circle>();
                         isMove = true;
+
+                        if (circle.canMove)
+                        {
+                            circle.Move("IsSelected",null,null,circle.belongToStand.GetComponent<Stand>().movePos);
+                            selectedStand = circle.belongToStand;
+                        }   
                     }
                 }
             }
