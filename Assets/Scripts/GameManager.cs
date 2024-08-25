@@ -24,7 +24,16 @@ public class GameManager : MonoBehaviour
                 {
                     if (selectedCircle !=null && selectedStand != hit.collider.gameObject)
                     {//çemberi gönder. 
-                        
+                        Stand stand = hit.collider.GetComponent<Stand>();
+                        selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
+
+                        circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
+
+                        stand.emptySocket++;
+                        stand.circles.Add(selectedCircle);
+
+                        selectedCircle = null;
+                        selectedStand = null;
                     }
                     else
                     {
