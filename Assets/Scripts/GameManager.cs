@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
             {
                 if (hit.collider != null && hit.collider.CompareTag("Stand"))
                 {
-                    if (selectedCircle !=null && selectedStand != hit.collider.gameObject)
+                    if (selectedCircle != null && selectedStand != hit.collider.gameObject)
                     {//çemberi gönder. 
                         Stand stand = hit.collider.GetComponent<Stand>();
                         selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
@@ -35,18 +35,23 @@ public class GameManager : MonoBehaviour
                         selectedCircle = null;
                         selectedStand = null;
                     }
+                    else if (selectedStand == hit.collider.gameObject)
+                    {
+                        circle.Move("backToSocket");
+                        selectedCircle = null;
+                        selectedStand = null;
+                    }
                     else
                     {
                         Stand stand = hit.collider.GetComponent<Stand>();
                         selectedCircle = stand.TopMostCircle();
                         circle = selectedCircle.GetComponent<Circle>();
                         isMove = true;
-
                         if (circle.canMove)
                         {
-                            circle.Move("IsSelected",null,null,circle.belongToStand.GetComponent<Stand>().movePos);
+                            circle.Move("IsSelected", null, null, circle.belongToStand.GetComponent<Stand>().movePos);
                             selectedStand = circle.belongToStand;
-                        }   
+                        }
                     }
                 }
             }

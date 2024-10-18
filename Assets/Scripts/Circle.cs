@@ -27,28 +27,25 @@ public class Circle : MonoBehaviour
 
             case "changePos":
                 _getAssignedStand = stand;
-                belongToCircleSockets =  socket;
+                belongToCircleSockets = socket;
                 _movePos = goToObj;
                 changePos = true;
                 break;
-
-            case "socketSeated":
-                break;
-
             case "backToSocket":
+                backToSocket = true;
                 break;
-        }  
+        }
     }
 
     private void Update()
     {
-        if (isSelected) 
+        if (isSelected)
         {
             transform.position = Vector3.Lerp(transform.position, _movePos.transform.position, .2f);
             if (Vector3.Distance(transform.position, _movePos.transform.position) < .10f)
             {
                 isSelected = false;
-             
+
             }
         }
         if (changePos)
@@ -71,10 +68,21 @@ public class Circle : MonoBehaviour
 
                 belongToStand = _getAssignedStand;
 
-                if (belongToStand.GetComponent<Stand>().circles.Count>1)
+                if (belongToStand.GetComponent<Stand>().circles.Count > 1)
                 {
                     belongToStand.GetComponent<Stand>().circles[^2].GetComponent<Circle>().canMove = false;
                 }
+                gameManager.isMove = false;
+            }
+        }
+
+        if (backToSocket)
+        {
+            transform.position = Vector3.Lerp(transform.position, belongToCircleSockets.transform.position, .2f);
+            if (Vector3.Distance(transform.position, belongToCircleSockets.transform.position) < .10f)
+            {
+                transform.position = belongToCircleSockets.transform.position;
+                backToSocket = false;
                 gameManager.isMove = false;
             }
         }
