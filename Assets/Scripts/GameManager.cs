@@ -23,17 +23,48 @@ public class GameManager : MonoBehaviour
                 if (hit.collider != null && hit.collider.CompareTag("Stand"))
                 {
                     if (selectedCircle != null && selectedStand != hit.collider.gameObject)
-                    {//çemberi gönder. 
+                    {
                         Stand stand = hit.collider.GetComponent<Stand>();
-                        selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
 
-                        circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
+                        if (stand.circles.Count != 4 & stand.circles.Count !=0)
+                        {
+                            if (circle.color == stand.circles[^1].GetComponent<Circle>().color)
+                            {
+                                selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
 
-                        stand.emptySocket++;
-                        stand.circles.Add(selectedCircle);
+                                circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
 
-                        selectedCircle = null;
-                        selectedStand = null;
+                                stand.emptySocket++;
+                                stand.circles.Add(selectedCircle);
+
+                                selectedCircle = null;
+                                selectedStand = null;
+                            }
+                            else
+                            {
+                                circle.Move("backToSocket");
+                                selectedCircle = null;
+                                selectedStand = null;
+                            }
+                        }
+                        else if (stand.circles.Count == 0)
+                        {
+                            selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
+
+                            circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
+
+                            stand.emptySocket++;
+                            stand.circles.Add(selectedCircle);
+
+                            selectedCircle = null;
+                            selectedStand = null;
+                        }
+                        else
+                        {
+                            circle.Move("backToSocket");
+                            selectedCircle = null;
+                            selectedStand = null;
+                        }
                     }
                     else if (selectedStand == hit.collider.gameObject)
                     {
