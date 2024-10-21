@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +9,9 @@ public class GameManager : MonoBehaviour
     public GameObject selectedStand;
     Circle circle;
     public bool isMove;
+    public int targetStandColor;
 
-
-    public int targetStandNumber;
-    public int currentStandNumber; //tamamlanan stand sayýsý.
+    private int _completedOfColors;
 
     // Update is called once per frame
     void Update()
@@ -36,6 +36,7 @@ public class GameManager : MonoBehaviour
 
                                 stand.emptySocket++;
                                 stand.circles.Add(selectedCircle);
+                                stand.CircleController();
 
                                 selectedCircle = null;
                                 selectedStand = null;
@@ -55,6 +56,7 @@ public class GameManager : MonoBehaviour
 
                             stand.emptySocket++;
                             stand.circles.Add(selectedCircle);
+                            stand.CircleController();
 
                             selectedCircle = null;
                             selectedStand = null;
@@ -86,6 +88,15 @@ public class GameManager : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    public void CompletedOfColors()
+    {
+        _completedOfColors++;
+        if (_completedOfColors == targetStandColor)
+        {
+            Debug.Log("Kazandýn "); // win panel
         }
     }
 }
