@@ -13,77 +13,73 @@ public class GameManager : MonoBehaviour
 
     private int _completedOfColors;
 
-    // Update is called once per frame
     void Update()
     {
+        if (selectedCircle != null && !selectedCircle.scene.isLoaded)
+        {
+            selectedCircle = null;
+            circle = null;
+        }
+
+        if (selectedStand != null && !selectedStand.scene.isLoaded)
+        {
+            selectedStand = null;
+        }
+
         if (Input.GetMouseButtonDown(0))
         {
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit hit, 100))
             {
                 if (hit.collider != null && hit.collider.CompareTag("Stand"))
                 {
-                    if (selectedCircle != null && selectedStand != hit.collider.gameObject)
+                    if (selectedCircle != null && selectedStand != null && selectedStand != hit.collider.gameObject)
                     {
                         Stand stand = hit.collider.GetComponent<Stand>();
-
-                        if (stand.circles.Count != 4 & stand.circles.Count !=0)
+                        if (stand != null && stand.circles != null && stand.circles.Count != 4)
                         {
-                            if (circle.color == stand.circles[^1].GetComponent<Circle>().color)
+                            if (stand.circles.Count == 0)
                             {
-                                selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
-
-                                circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
-
-                                stand.emptySocket++;
-                                stand.circles.Add(selectedCircle);
-                                stand.CircleController();
-
-                                selectedCircle = null;
-                                selectedStand = null;
+                                MoveCircleToEmptyStand(stand, hit.collider.gameObject);
                             }
-                            else
+                            else if (circle != null && stand.circles[^1] != null)
                             {
-                                circle.Move("backToSocket");
-                                selectedCircle = null;
-                                selectedStand = null;
+                                Circle topCircle = stand.circles[^1].GetComponent<Circle>();
+                                if (topCircle != null && circle.color == topCircle.color)
+                                {
+                                    MoveCircleToStand(stand, hit.collider.gameObject);
+                                }
+                                else
+                                {
+                                    ReturnCircleToOriginalPosition();
+                                }
                             }
-                        }
-                        else if (stand.circles.Count == 0)
-                        {
-                            selectedStand.GetComponent<Stand>().ChangeSocketTransform(selectedCircle);
-
-                            circle.Move("changePos", hit.collider.gameObject, stand.GetAvaibleSocket(), stand.movePos);
-
-                            stand.emptySocket++;
-                            stand.circles.Add(selectedCircle);
-                            stand.CircleController();
-
-                            selectedCircle = null;
-                            selectedStand = null;
                         }
                         else
                         {
-                            circle.Move("backToSocket");
-                            selectedCircle = null;
-                            selectedStand = null;
+                            ReturnCircleToOriginalPosition();
                         }
                     }
                     else if (selectedStand == hit.collider.gameObject)
                     {
-                        circle.Move("backToSocket");
-                        selectedCircle = null;
-                        selectedStand = null;
+                        ReturnCircleToOriginalPosition();
                     }
                     else
                     {
                         Stand stand = hit.collider.GetComponent<Stand>();
-                        selectedCircle = stand.TopMostCircle();
-                        circle = selectedCircle.GetComponent<Circle>();
-                        isMove = true;
-                        if (circle.canMove)
+                        if (stand != null)
                         {
-                            circle.Move("IsSelected", null, null, circle.belongToStand.GetComponent<Stand>().movePos);
-                            selectedStand = circle.belongToStand;
+                            GameObject topCircle = stand.TopMostCircle();
+                            if (topCircle != null)
+                            {
+                                selectedCircle = topCircle;
+                                circle = selectedCircle.GetComponent<Circle>();
+                                if (circle != null && circle.canMove)
+                                {
+                                    isMove = true;
+                                    circle.Move("IsSelected", null, null, stand.movePos);
+                                    selectedStand = circle.belongToStand;
+                                }
+                            }
                         }
                     }
                 }
@@ -91,12 +87,61 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void MoveCircleToStand(Stand stand, GameObject hitObject)
+    {
+        if (selectedStand != null)
+        {
+            Stand currentStand = selectedStand.GetComponent<Stand>();
+            if (currentStand != null)
+            {
+                currentStand.ChangeSocketTransform(selectedCircle);
+                circle.Move("changePos", hitObject, stand.GetAvaibleSocket(), stand.movePos);
+                stand.emptySocket++;
+                stand.circles.Add(selectedCircle);
+                stand.CircleController();
+                ResetSelection();
+            }
+        }
+    }
+
+    private void MoveCircleToEmptyStand(Stand stand, GameObject hitObject)
+    {
+        if (selectedStand != null)
+        {
+            Stand currentStand = selectedStand.GetComponent<Stand>();
+            if (currentStand != null)
+            {
+                currentStand.ChangeSocketTransform(selectedCircle);
+                circle.Move("changePos", hitObject, stand.GetAvaibleSocket(), stand.movePos);
+                stand.emptySocket++;
+                stand.circles.Add(selectedCircle);
+                stand.CircleController();
+                ResetSelection();
+            }
+        }
+    }
+
+    private void ReturnCircleToOriginalPosition()
+    {
+        if (circle != null)
+        {
+            circle.Move("backToSocket");
+            ResetSelection();
+        }
+    }
+
+    private void ResetSelection()
+    {
+        selectedCircle = null;
+        selectedStand = null;
+    }
+
     public void CompletedOfColors()
     {
         _completedOfColors++;
         if (_completedOfColors == targetStandColor)
         {
-            Debug.Log("Kazandýn "); // win panel
+            Debug.Log("Kazandýn");
         }
     }
 }

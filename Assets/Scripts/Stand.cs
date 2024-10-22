@@ -8,29 +8,78 @@ public class Stand : MonoBehaviour
     public GameObject[] sockets;
     public int emptySocket;
     public List<GameObject> circles = new();
-
-
     [SerializeField] private GameManager _gameManager;
     private int _circileCount;
-   
+
 
     public GameObject TopMostCircle()
     {
-        return circles[^1];
+        if (circles != null && circles.Count > 0)
+        {
+            GameObject topCircle = circles[^1];
+            if (topCircle != null && topCircle.scene.isLoaded)
+            {
+                return topCircle;
+            }
+            else
+            {
+                circles.RemoveAt(circles.Count - 1);
+                return null;
+            }
+        }
+        return null;
     }
+
 
     public GameObject GetAvaibleSocket()
     {
-        return sockets[emptySocket];
+        if (sockets != null && emptySocket >= 0 && emptySocket < sockets.Length)
+        {
+            return sockets[emptySocket];
+        }
+        return null;
     }
 
-    public void ChangeSocketTransform(GameObject deleteobj)
+    public void ChangeSocketTransform(GameObject deleteObj)
     {
-        circles.Remove(deleteobj);
-        if (circles.Count!=0)
+        if (deleteObj == null || !deleteObj.scene.isLoaded) return;
+
+        // Circle'ý listeden kaldýr
+        circles.Remove(deleteObj);
+
+        if (circles.Count != 0)
         {
             emptySocket--;
-            circles[^1].GetComponent<Circle>().canMove = true;
+            GameObject topCircle = circles[^1];
+            if (topCircle != null)
+            {
+                Circle circleComponent = topCircle.GetComponent<Circle>();
+                if (circleComponent != null)
+                {
+                    circleComponent.canMove = true;
+                }
+            }
+        }
+        else
+        {
+            emptySocket = 0;
+        }
+    }
+
+    private void UpdateInternalState()
+    {
+        if (circles.Count != 0)
+        {
+            emptySocket--;
+            GameObject topCircle = circles[^1];
+            if (topCircle != null && topCircle.scene.isLoaded)
+            {
+                Circle circleComponent = topCircle.GetComponent<Circle>();
+                if (circleComponent != null)
+                {
+                    circleComponent.canMove = true;
+                }
+            }
         }
         else
         {
@@ -42,12 +91,12 @@ public class Stand : MonoBehaviour
     {
         if (circles.Count == 4)
         {
-            string color = circles[0].GetComponent<Circle>().color;
+            string firstColor = circles[0].GetComponent<Circle>().color;
             bool allSameColor = true;
 
             foreach (var circle in circles)
             {
-                if (color != circle.GetComponent<Circle>().color)
+                if (firstColor != circle.GetComponent<Circle>().color)
                 {
                     allSameColor = false;
                     break;
@@ -70,12 +119,32 @@ public class Stand : MonoBehaviour
         Destroy(gameObject);
     }
 
+
     void CompletedOfStand()
     {
-        foreach (var circle in circles)
+        foreach (var circle in circles.ToArray())
         {
-            circle.GetComponent<Circle>().canMove = false;
-            Destroy(circle);
+            if (circle != null)
+            {
+                Circle circleComponent = circle.GetComponent<Circle>();
+                if (circleComponent != null && circleComponent.belongToStand == gameObject)
+                {
+                    circleComponent.canMove = false;
+                    Destroy(circle);
+                }
+            }
+        }
+        circles.Clear();
+    }
+
+    private void OnDestroy()
+    {
+        if (_gameManager != null)
+        {
+            if (_gameManager.selectedStand == gameObject)
+            {
+                _gameManager.selectedStand = null;
+            }
         }
     }
 }

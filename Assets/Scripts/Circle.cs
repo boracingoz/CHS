@@ -9,12 +9,10 @@ public class Circle : MonoBehaviour
     public bool canMove;
     public string color;
     public GameManager gameManager;
-
-
     private GameObject _movePos;
     private GameObject _getAssignedStand;
-
     bool isSelected, changePos, socketSeated, backToSocket;
+
 
     public void Move(string transaction, GameObject stand = null, GameObject socket = null, GameObject goToObj = null)
     {
@@ -22,9 +20,8 @@ public class Circle : MonoBehaviour
         {
             case "IsSelected":
                 _movePos = goToObj;
-                isSelected = true; // Bu satýrý ekleyin
+                isSelected = true;
                 break;
-
             case "changePos":
                 _getAssignedStand = stand;
                 belongToCircleSockets = socket;
@@ -45,7 +42,6 @@ public class Circle : MonoBehaviour
             if (Vector3.Distance(transform.position, _movePos.transform.position) < .10f)
             {
                 isSelected = false;
-
             }
         }
         if (changePos)
@@ -55,7 +51,6 @@ public class Circle : MonoBehaviour
             {
                 changePos = false;
                 socketSeated = true;
-
             }
         }
         if (socketSeated)
@@ -65,17 +60,22 @@ public class Circle : MonoBehaviour
             {
                 transform.position = belongToCircleSockets.transform.position;
                 socketSeated = false;
-
                 belongToStand = _getAssignedStand;
-
-                if (belongToStand.GetComponent<Stand>().circles.Count > 1)
+                if (belongToStand != null)
                 {
-                    belongToStand.GetComponent<Stand>().circles[^2].GetComponent<Circle>().canMove = false;
+                    Stand stand = belongToStand.GetComponent<Stand>();
+                    if (stand != null && stand.circles.Count > 1)
+                    {
+                        GameObject previousCircle = stand.circles[^2];
+                        if (previousCircle != null)
+                        {
+                            previousCircle.GetComponent<Circle>().canMove = false;
+                        }
+                    }
                 }
                 gameManager.isMove = false;
             }
         }
-
         if (backToSocket)
         {
             transform.position = Vector3.Lerp(transform.position, belongToCircleSockets.transform.position, .2f);
@@ -85,6 +85,14 @@ public class Circle : MonoBehaviour
                 backToSocket = false;
                 gameManager.isMove = false;
             }
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (gameManager != null && gameManager.selectedCircle == gameObject)
+        {
+            gameManager.selectedCircle = null;
         }
     }
 }
